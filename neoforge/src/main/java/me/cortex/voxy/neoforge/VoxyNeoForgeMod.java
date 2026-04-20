@@ -2,6 +2,7 @@ package me.cortex.voxy.neoforge;
 
 import me.cortex.voxy.api.Platform;
 import me.cortex.voxy.client.VoxyClient;
+import me.cortex.voxy.client.mixin.iris.MixinStandardMacros;
 import me.cortex.voxy.commonImpl.VoxyCommon;
 import me.cortex.voxy.neoforge.platform.NeoForgePlatform;
 import net.neoforged.api.distmarker.Dist;
@@ -16,6 +17,7 @@ public class VoxyNeoForgeMod {
     
     public VoxyNeoForgeMod(IEventBus bus, ModContainer container) {
         Platform.setInstance(new NeoForgePlatform(container));
+        MixinStandardMacros.markPlatformInitialized();
         
         VoxyCommon.init();
         
