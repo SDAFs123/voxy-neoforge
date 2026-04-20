@@ -24,8 +24,14 @@ public class IrisUtil {
     public static final boolean SHADER_SUPPORT = true;//System.getProperty("voxy.enableExperimentalIrisPipeline", "false").equalsIgnoreCase("true");
 
 
+    private static boolean shadowActive = false;
+    
+    public static void setShadowActive(boolean active) {
+        shadowActive = active;
+    }
+    
     private static boolean irisShadowActive0() {
-        return ShadowRenderer.ACTIVE;
+        return shadowActive;
     }
 
     public static boolean irisShadowActive() {
