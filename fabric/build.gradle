@@ -81,7 +81,6 @@ dependencies {
     include(implementation "org.rocksdb:rocksdbjni:${project.rocksdb_version}")
     include(implementation "redis.clients:jedis:${project.jedis_version}")
     include(implementation "org.apache.commons:commons-pool2:${project.commons_pool2_version}")
-    include(implementation "org.lz4:lz4-java:${project.lz4_version}")
 }
 
 loom {

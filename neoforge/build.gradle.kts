@@ -43,7 +43,6 @@ dependencies {
     jarJar("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     jarJar("redis.clients:jedis:${project.property("jedis_version")}")
     jarJar("org.apache.commons:commons-pool2:${project.property("commons_pool2_version")}")
-    jarJar("org.lz4:lz4-java:${project.property("lz4_version")}")
 }
 
 neoForge {
