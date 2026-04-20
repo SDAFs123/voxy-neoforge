@@ -1,7 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
 license = "All-Rights-Reserved"
-issueTrackerURL = "https://github.com/paperfrog/voxy-neoforge/issues"
+issueTrackerURL = "https://github.com/SDAFs123/voxy-neoforge/issues"
 
 [[mods]]
 modId = "voxy"
