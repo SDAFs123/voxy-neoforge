@@ -53,7 +53,6 @@ dependencies {
     additionalRuntimeClasspath("it.unimi.dsi:fastutil:8.5.12")
     additionalRuntimeClasspath("org.joml:joml:1.10.5")
     
-    jarJar("io.github.llamalad7:mixinextras-common:0.4.1")
     jarJar("org.lwjgl:lwjgl-lmdb:${project.property("lwjgl_version")}")
     jarJar("org.lwjgl:lwjgl-zstd:${project.property("lwjgl_version")}")
     jarJar("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
