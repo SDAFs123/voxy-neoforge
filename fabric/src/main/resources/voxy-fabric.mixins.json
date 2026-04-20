@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.cortex.voxy.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "fakesight.IntegratedServerMixin",
+    "fakesight.OptionsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

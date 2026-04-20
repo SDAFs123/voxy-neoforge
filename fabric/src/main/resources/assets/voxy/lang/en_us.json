@@ -36,5 +36,14 @@
   "voxy.config.general.ssao_mode.auto": "Auto",
   "voxy.config.general.ssao_mode.basic": "Basic",
   "voxy.config.general.ssao_mode.better": "Better",
-  "voxy.config.general.ssao_mode.best": "Best"
+  "voxy.config.general.ssao_mode.best": "Best",
+
+  "voxy.config.fakesight": "Extended Chunk Request",
+  "voxy.config.fakesight.enabled": "Enable Extended Chunk Request",
+  "voxy.config.fakesight.enabled.tooltip": "Request chunks beyond vanilla render distance from server for LoD rendering",
+  "voxy.config.fakesight.distance": "Request Distance",
+  "voxy.config.fakesight.distance.tooltip": "Chunk distance to request from server (8-127 chunks)",
+  
+  "voxy.config.debug.suppress_warnings": "Suppress Init Warnings",
+  "voxy.config.debug.suppress_warnings.tooltip": "Suppress initialization warning messages in logs"
 }

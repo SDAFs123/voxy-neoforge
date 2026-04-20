@@ -5,16 +5,22 @@
   "custom": {
     "commit": "${commit}"
   },
-  "name": "Voxy",
-  "description": "Far distance rendering mod utilising LoDs",
+  "name": "Voxy (Fabric Port)",
+  "description": "Voxy LoD渲染模组 - Fabric移植版。原版作者: CortexMC, m3t4f1v3; Fakesight作者: MoePus; 移植作者: paperfrog",
   "authors": [
-    "Cortex"
+    "CortexMC",
+    "m3t4f1v3",
+    "MoePus (Fakesight)",
+    "paperfrog (Port)"
   ],
   "contact": {
+    "homepage": "https://github.com/CortexMC/Voxy",
+    "sources": "https://github.com/SDAFs123/voxy-neoforge",
+    "issues": "https://github.com/SDAFs123/voxy-neoforge/issues"
   },
   "license": "All-Rights-Reserved",
   "icon": "assets/voxy/icon.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
       "me.cortex.voxy.fabric.VoxyFabricMod"
@@ -24,9 +30,6 @@
     ],
     "sodium:config_api_user": [
       "me.cortex.voxy.client.config.VoxyConfigMenu"
-    ],
-    "main": [
-      "me.cortex.voxy.fabric.VoxyFabricMod"
     ]
   },
   "mixins": [
@@ -34,13 +37,17 @@
       "config": "client.voxy.mixins.json",
       "environment": "client"
     },
-    "common.voxy.mixins.json"
+    "common.voxy.mixins.json",
+    "voxy-fabric.mixins.json"
   ],
   "depends": {
     "minecraft": ["1.21.1"],
-    "fabricloader": ">=0.14.22",
-    "fabric-api": ">=0.91.1",
+    "fabricloader": ">=0.16.0",
+    "fabric-api": ">=0.116.0",
     "sodium": ">=0.6.13"
+  },
+  "conflicts": {
+    "optifine": "*"
   },
   "accessWidener": "voxy.accesswidener"
 }
