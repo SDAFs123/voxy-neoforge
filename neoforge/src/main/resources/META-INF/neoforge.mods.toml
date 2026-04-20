@@ -1,0 +1,80 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "All-Rights-Reserved"
+issueTrackerURL = "https://github.com/paperfrog/voxy-neoforge/issues"
+
+[[mods]]
+modId = "voxy"
+version = "${version}"
+displayName = "Voxy (NeoForge Port)"
+authors = "CortexMC, m3t4f1v3 (Voxy Original); MoePus (Fakesight); paperfrog (NeoForge Port)"
+description = '''
+Voxy LoD渲染模组 - NeoForge移植版
+
+原版Voxy作者:
+- https://github.com/CortexMC/Voxy
+- https://github.com/m3t4f1v3/voxy
+
+Fakesight作者:
+- https://github.com/MoePus/fakesight
+
+移植作者: paperfrog
+
+这是从Fabric到NeoForge 1.21.1的移植版本。
+使用层次化区块数据提供超远距离LoD渲染。
+整合Fakesight区块请求欺骗功能。
+'''
+
+[[dependencies.voxy]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1]"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.voxy]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.122,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.voxy]]
+modId = "sodium"
+type = "required"
+versionRange = "[0.6.13,)"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.voxy]]
+modId = "iris"
+type = "optional"
+versionRange = "[1.8.8,)"
+ordering = "AFTER"
+side = "CLIENT"
+reason = "提供shader包支持"
+
+[[dependencies.voxy]]
+modId = "embeddium"
+type = "incompatible"
+versionRange = "[0.0.1,)"
+ordering = "NONE"
+side = "CLIENT"
+reason = "Voxy需要原生Sodium，不兼容Embeddium"
+
+[[dependencies.voxy]]
+modId = "optifine"
+type = "incompatible"
+versionRange = "*"
+ordering = "NONE"
+side = "CLIENT"
+reason = "Optifine与Sodium不兼容"
+
+[[mixins]]
+config = "common.voxy.mixins.json"
+
+[[mixins]]
+config = "voxy-client.mixins.json"
+
+[[mixins]]
+config = "voxy-neoforge.mixins.json"

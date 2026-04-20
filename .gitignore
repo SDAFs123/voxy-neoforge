@@ -1,0 +1,52 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# Minecraft run directories
+fabric/run/
+neoforge/run/
+neoforge/run*/
+common/run/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local config
+*.local
+local.properties
+
+# Compiled
+*.class
+*.jar
+!gradle-wrapper.jar
+
+# Cache
+.cache/
+output/
+
+# Temporary
+*.tmp
+*.temp
+*.bak

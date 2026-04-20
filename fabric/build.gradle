@@ -1,0 +1,96 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabricmc.net' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.fabricmc:fabric-loom:${project.loom_version}"
+    }
+}
+
+apply plugin: 'fabric-loom'
+
+base {
+    archivesName = "${project.archives_base_name}-fabric"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven { url = "https://maven.shedaniel.me/" }
+    maven { url = "https://maven.terraformersmc.com/releases/" }
+}
+
+def isInGHA = System.getenv("GITHUB_ACTIONS") == "true"
+
+def gitCommitHash = { ->
+    try {
+        ExecOutput result = providers.exec {
+            commandLine = ['git', 'rev-parse', '--short', 'HEAD']
+            ignoreExitValue = true
+        }
+        if (result.getResult().get().getExitValue() != 0) {
+            return "<UnknownCommit>";
+        } else {
+            return result.standardOutput.asText.get().strip();
+        }
+    } catch (Exception e) {
+        return "<UnknownCommit>";
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    
+    modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    
+    modCompileOnly "maven.modrinth:sodium:${project.sodium_version}-fabric"
+    modRuntimeOnly "maven.modrinth:sodium:${project.sodium_version}-fabric"
+    
+    modImplementation "maven.modrinth:lithium:${project.lithium_version}-fabric"
+    
+    modCompileOnly "maven.modrinth:iris:${project.iris_version}-fabric"
+    modRuntimeOnly "maven.modrinth:iris:${project.iris_version}-fabric"
+    
+    modCompileOnly "maven.modrinth:modmenu:11.0.3"
+    modRuntimeOnly "maven.modrinth:modmenu:11.0.3"
+    
+    implementation(project(':common'))
+    include(implementation(project(':common')))
+    
+    include(implementation "org.lwjgl:lwjgl-lmdb:${project.lwjgl_version}")
+    include(implementation "org.lwjgl:lwjgl-zstd:${project.lwjgl_version}")
+    include(implementation "org.rocksdb:rocksdbjni:${project.rocksdb_version}")
+    include(implementation "redis.clients:jedis:${project.jedis_version}")
+    include(implementation "org.apache.commons:commons-pool2:${project.commons_pool2_version}")
+    include(implementation "org.lz4:lz4-java:${project.lz4_version}")
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/voxy.accesswidener")
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "commit", gitCommitHash()
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version, "commit": gitCommitHash()
+    }
+}

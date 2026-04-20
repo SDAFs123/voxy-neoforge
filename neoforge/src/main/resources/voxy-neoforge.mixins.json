@@ -1,0 +1,15 @@
+{
+  "package": "me.cortex.voxy.neoforge.mixin",
+  "required": true,
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "conformVisibility": true
+  },
+  "client": [
+    "fakesight.IntegratedServerMixin",
+    "fakesight.OptionsMixin"
+  ]
+}
