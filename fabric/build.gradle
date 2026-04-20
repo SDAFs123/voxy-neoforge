@@ -34,6 +34,7 @@ repositories {
     }
     maven { url = "https://maven.shedaniel.me/" }
     maven { url = "https://maven.terraformersmc.com/releases/" }
+    maven { url = "https://maven.parchmentmc.org/" }
 }
 
 def isInGHA = System.getenv("GITHUB_ACTIONS") == "true"
