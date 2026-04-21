@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         maven { url 'https://maven.neoforged.net/releases' }
         maven { url 'https://maven.fabricmc.net' }
+        maven { url 'https://maven.architectury.dev' }
     }
 }
 
@@ -15,6 +16,7 @@ dependencyResolutionManagement {
         maven { url 'https://maven.shedaniel.me/' }
         maven { url 'https://maven.terraformersmc.com/releases/' }
         maven { url 'https://maven.neoforged.net/releases' }
+        maven { url 'https://maven.architectury.dev' }
     }
 }
 
@@ -22,3 +24,4 @@ rootProject.name = 'voxy'
 include 'common'
 include 'fabric'
 include 'neoforge'
+include 'unified'
