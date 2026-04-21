@@ -8,8 +8,5 @@
   "overwrites": {
     "conformVisibility": true
   },
-  "client": [
-    "fakesight.IntegratedServerMixin",
-    "fakesight.OptionsMixin"
-  ]
+  "client": []
 }

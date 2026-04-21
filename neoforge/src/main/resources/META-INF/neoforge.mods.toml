@@ -78,3 +78,6 @@ config = "voxy-client.mixins.json"
 
 [[mixins]]
 config = "voxy-neoforge.mixins.json"
+
+[[mixins]]
+config = "voxy-fakesight.mixins.json"
