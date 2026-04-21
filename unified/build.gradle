@@ -12,18 +12,11 @@ java {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven { url 'https://maven.fabricmc.net' }
-    maven { url 'https://maven.neoforged.net/releases' }
-    maven { url 'https://api.modrinth.com/maven' }
-}
-
 tasks.register('mergePlatformJars', Jar) {
     group = 'build'
     description = 'Merge Fabric and NeoForge jars into universal jar'
     
-    dependsOn ':fabric:build', ':neoforge:build'
+    dependsOn ':fabric:remapJar', ':neoforge:finalJar'
     
     archiveBaseName = 'voxy'
     archiveClassifier = 'universal'
@@ -31,27 +24,26 @@ tasks.register('mergePlatformJars', Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
     doFirst {
-        def fabricJar = file('../fabric/build/libs/voxy-fabric-' + project.version + '.jar')
-        def neoforgeJar = file('../neoforge/build/libs/voxy-neoforge-' + project.version + '.jar')
-        
-        if (!fabricJar.exists()) {
-            throw new GradleException("Fabric jar not found: ${fabricJar}")
-        }
-        if (!neoforgeJar.exists()) {
-            throw new GradleException("NeoForge jar not found: ${neoforgeJar}")
-        }
+        def fabricJar = project(':fabric').layout.buildDirectory.file('libs/voxy-fabric-' + project.version + '.jar').get().asFile
+        def neoforgeJar = project(':neoforge').layout.buildDirectory.file('libs/voxy-neoforge-' + project.version + '.jar').get().asFile
         
         println "Fabric jar: ${fabricJar} (${fabricJar.length()/1024/1024}MB)"
         println "NeoForge jar: ${neoforgeJar} (${neoforgeJar.length()/1024/1024}MB)"
-        
-        from(zipTree(fabricJar))
-        from(zipTree(neoforgeJar))
-        
-        exclude 'META-INF/MANIFEST.MF'
-        exclude 'META-INF/*.SF'
-        exclude 'META-INF/*.DSA'
-        exclude 'META-INF/*.RSA'
     }
+    
+    from(zipTree(project(':fabric').layout.buildDirectory.file('libs/voxy-fabric-' + project.version + '.jar'))) {
+        exclude 'META-INF/jars/commons-pool2*.jar'
+        exclude 'META-INF/jars/jedis*.jar'
+        exclude 'META-INF/jars/lwjgl*.jar'
+        exclude 'META-INF/jars/rocksdb*.jar'
+    }
+    
+    from(zipTree(project(':neoforge').layout.buildDirectory.file('libs/voxy-neoforge-' + project.version + '.jar')))
+    
+    exclude 'META-INF/MANIFEST.MF'
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
     
     manifest {
         attributes 'Specification-Title': 'voxy'

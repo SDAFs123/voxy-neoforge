@@ -87,6 +87,70 @@ loom {
     accessWidenerPath = file("src/main/resources/voxy.accesswidener")
 }
 
+tasks.register('stripNatives') {
+    dependsOn remapJar
+    doLast {
+        def jarFile = remapJar.archiveFile.get().asFile
+        def outputDir = layout.buildDirectory.dir("stripped-jar").get().asFile
+        
+        ant.unzip(src: jarFile, dest: outputDir)
+        
+        FileTree tree = fileTree(dir: outputDir)
+        tree.each { f ->
+            def name = f.name
+            def path = f.parent ?: ""
+            boolean shouldDelete = false
+            
+            if (name.endsWith(".so") && !path.contains("linux64") && !path.contains("linux-aarch64")) {
+                shouldDelete = true
+            } else if (name.endsWith(".dylib") || name.endsWith(".jnilib")) {
+                shouldDelete = false // Keep Mac natives
+            } else if (name.contains("win32") || name.contains("linux32") ||
+                       name.contains("linux-ppc64") || name.contains("linux-s390x") ||
+                       name.contains("linux-riscv") || name.contains("musl")) {
+                shouldDelete = true
+            }
+            
+            if (shouldDelete) {
+                println "Removing: ${name}"
+                f.delete()
+            }
+        }
+        
+        def rocksdbJar = file("${outputDir}/META-INF/jars/rocksdbjni-${project.rocksdb_version}.jar")
+        if (rocksdbJar.exists()) {
+            def rocksdbTempDir = layout.buildDirectory.dir("temp-rocksdb").get().asFile
+            ant.unzip(src: rocksdbJar, dest: rocksdbTempDir)
+            
+            FileTree rocksdbTree = fileTree(dir: rocksdbTempDir)
+            rocksdbTree.each { f ->
+                def name = f.name
+                if (name.contains("win32") || name.contains("linux32") ||
+                    name.contains("linux-ppc64") || name.contains("linux-s390x") ||
+                    name.contains("linux-riscv") || name.contains("musl")) {
+                    println "Removing from RocksDB: ${name}"
+                    f.delete()
+                }
+            }
+            
+            rocksdbJar.delete()
+            ant.zip(destfile: rocksdbJar, basedir: rocksdbTempDir)
+            rocksdbTempDir.deleteDir()
+            
+            println "RocksDB jar size: ${rocksdbJar.length()/1024/1024}MB"
+        }
+        
+        ant.zip(destfile: jarFile, basedir: outputDir)
+        outputDir.deleteDir()
+        
+        println "Fabric jar size after stripping: ${jarFile.length()/1024/1024}MB"
+    }
+}
+
+tasks.named('assemble') {
+    dependsOn stripNatives
+}
+
 processResources {
     inputs.property "version", project.version
     inputs.property "commit", gitCommitHash()
