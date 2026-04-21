@@ -25,7 +25,6 @@ repositories {
 
 configurations {
     create("lz4Flatten")
-    create("rocksdbRaw")
 }
 
 dependencies {
@@ -40,7 +39,6 @@ dependencies {
     implementation("org.lz4:lz4-java:${project.property("lz4_version")}")
     
     "lz4Flatten"("org.lz4:lz4-java:${project.property("lz4_version")}")
-    "rocksdbRaw"("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     
     additionalRuntimeClasspath("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     additionalRuntimeClasspath("redis.clients:jedis:${project.property("jedis_version")}")
@@ -57,6 +55,7 @@ dependencies {
     
     jarJar("org.lwjgl:lwjgl-lmdb:${project.property("lwjgl_version")}")
     jarJar("org.lwjgl:lwjgl-zstd:${project.property("lwjgl_version")}")
+    jarJar("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     jarJar("redis.clients:jedis:${project.property("jedis_version")}")
     jarJar("org.apache.commons:commons-pool2:${project.property("commons_pool2_version")}")
 }
@@ -161,33 +160,55 @@ tasks {
         }
     }
     
-    val stripRocksdbNatives by registering(Jar::class) {
-        from(zipTree(configurations["rocksdbRaw"].singleFile))
-        archiveClassifier = "rocksdb-stripped"
-        exclude("**/*.so")
-        exclude("**/*.dylib")
-        exclude("**/*.jnilib")
-        exclude("**/*win32*")
-        exclude("META-INF/MANIFEST.MF")
-    }
-    
-    val stripNatives by registering(Copy::class) {
-        dependsOn(jar, stripRocksdbNatives)
-        from(zipTree(jar.flatMap { it.archiveFile }))
-        into(layout.buildDirectory.dir("stripped-jar"))
-        exclude("**/*.so")
-        exclude("**/*.dylib")
-        exclude("**/*win32*")
-        exclude("META-INF/jarjar/rocksdbjni*.jar")
+    val stripNatives by registering {
+        dependsOn(jar)
+        doLast {
+            val jarFile = jar.flatMap { it.archiveFile }.get().asFile
+            val outputDir = layout.buildDirectory.dir("stripped-jar").get().asFile
+            
+            ant.withGroovyBuilder {
+                "unzip"("src" to jarFile, "dest" to outputDir)
+            }
+            
+            val rocksdbJar = File(outputDir, "META-INF/jarjar/rocksdbjni-${project.property("rocksdb_version")}.jar")
+            if (rocksdbJar.exists()) {
+                val rocksdbTempDir = layout.buildDirectory.dir("temp-rocksdb").get().asFile
+                
+                ant.withGroovyBuilder {
+                    "unzip"("src" to rocksdbJar, "dest" to rocksdbTempDir)
+                }
+                
+                rocksdbTempDir.walkTopDown()
+                    .filter { it.isFile }
+                    .filter { f -> 
+                        val name = f.name
+                        name.contains("win32") || name.contains("linux32") || 
+                        name.contains("linux-ppc64") || name.contains("linux-s390x") || 
+                        name.contains("linux-riscv") || name.contains("musl")
+                    }
+                    .forEach { f ->
+                        println("Removing: ${f.name}")
+                        f.delete()
+                    }
+                
+                rocksdbJar.delete()
+                
+                ant.withGroovyBuilder {
+                    "zip"("destfile" to rocksdbJar, "basedir" to rocksdbTempDir)
+                }
+                
+                rocksdbTempDir.deleteRecursively()
+                
+                val newSize = rocksdbJar.length() / 1024 / 1024
+                println("RocksDB jar size after stripping: ${newSize}MB")
+            }
+        }
     }
     
     val finalJar by registering(Jar::class) {
-        dependsOn(stripNatives, stripRocksdbNatives)
+        dependsOn(stripNatives)
         archiveClassifier = ""
         from(layout.buildDirectory.dir("stripped-jar"))
-        from(zipTree(stripRocksdbNatives.flatMap { it.archiveFile })) {
-            into("META-INF/jarjar")
-        }
         manifest {
             attributes(
                 "Specification-Title" to "voxy",
@@ -198,7 +219,7 @@ tasks {
         }
         doLast {
             val size = archiveFile.get().asFile.length() / 1024 / 1024
-            println("Final jar size: ${size}MB (stripped non-Windows natives)")
+            println("Final jar size: ${size}MB")
         }
     }
     
