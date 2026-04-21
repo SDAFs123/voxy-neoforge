@@ -25,6 +25,7 @@ repositories {
 
 configurations {
     create("lz4Flatten")
+    create("rocksdbRaw")
 }
 
 dependencies {
@@ -39,6 +40,7 @@ dependencies {
     implementation("org.lz4:lz4-java:${project.property("lz4_version")}")
     
     "lz4Flatten"("org.lz4:lz4-java:${project.property("lz4_version")}")
+    "rocksdbRaw"("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     
     additionalRuntimeClasspath("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     additionalRuntimeClasspath("redis.clients:jedis:${project.property("jedis_version")}")
@@ -55,7 +57,6 @@ dependencies {
     
     jarJar("org.lwjgl:lwjgl-lmdb:${project.property("lwjgl_version")}")
     jarJar("org.lwjgl:lwjgl-zstd:${project.property("lwjgl_version")}")
-    jarJar("org.rocksdb:rocksdbjni:${project.property("rocksdb_version")}")
     jarJar("redis.clients:jedis:${project.property("jedis_version")}")
     jarJar("org.apache.commons:commons-pool2:${project.property("commons_pool2_version")}")
 }
@@ -101,6 +102,8 @@ tasks {
         }
         exclude("META-INF/**")
         exclude("module-info.class")
+        exclude("**/*.dylib")
+        exclude("**/*.so")
     }
     
     val relocateLz4Refs by registering {
@@ -156,6 +159,51 @@ tasks {
                 "Implementation-Version" to project.version
             )
         }
+    }
+    
+    val stripRocksdbNatives by registering(Jar::class) {
+        from(zipTree(configurations["rocksdbRaw"].singleFile))
+        archiveClassifier = "rocksdb-stripped"
+        exclude("**/*.so")
+        exclude("**/*.dylib")
+        exclude("**/*.jnilib")
+        exclude("**/*win32*")
+        exclude("META-INF/MANIFEST.MF")
+    }
+    
+    val stripNatives by registering(Copy::class) {
+        dependsOn(jar, stripRocksdbNatives)
+        from(zipTree(jar.flatMap { it.archiveFile }))
+        into(layout.buildDirectory.dir("stripped-jar"))
+        exclude("**/*.so")
+        exclude("**/*.dylib")
+        exclude("**/*win32*")
+        exclude("META-INF/jarjar/rocksdbjni*.jar")
+    }
+    
+    val finalJar by registering(Jar::class) {
+        dependsOn(stripNatives, stripRocksdbNatives)
+        archiveClassifier = ""
+        from(layout.buildDirectory.dir("stripped-jar"))
+        from(zipTree(stripRocksdbNatives.flatMap { it.archiveFile })) {
+            into("META-INF/jarjar")
+        }
+        manifest {
+            attributes(
+                "Specification-Title" to "voxy",
+                "Specification-Version" to project.version,
+                "Implementation-Title" to project.name,
+                "Implementation-Version" to project.version
+            )
+        }
+        doLast {
+            val size = archiveFile.get().asFile.length() / 1024 / 1024
+            println("Final jar size: ${size}MB (stripped non-Windows natives)")
+        }
+    }
+    
+    assemble {
+        dependsOn(finalJar)
     }
     
     processResources {
